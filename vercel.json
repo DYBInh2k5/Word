@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@wordflow_supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@wordflow_supabase_anon_key",
+    "NEXT_PUBLIC_GEMINI_API_KEY": "@wordflow_gemini_api_key"
+  }
+}
