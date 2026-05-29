@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import ColorPickerPopup from "./ColorPickerPopup";
 import AIMenu from "./AIMenu";
+import { useAuthStore } from "@/store/authStore";
+import { useDocumentStore } from "@/store/documentStore";
+import { uploadImage } from "@/lib/cloudSync";
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -51,8 +54,47 @@ export default function Toolbar({ editor, onToggleFindReplace }: ToolbarProps) {
 
   const addImage = useCallback(() => {
     if (!editor) return;
-    const url = window.prompt("Nhập URL hình ảnh:", "");
-    if (url) editor.chain().focus().setImage({ src: url }).run();
+    const choice = window.confirm("Bạn muốn tải ảnh từ máy tính lên? (Chọn Cancel nếu muốn nhập URL hình ảnh trực tiếp)");
+    if (choice) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        
+        const user = useAuthStore.getState().user;
+        if (user) {
+          try {
+            useDocumentStore.getState().showToast("Đang tải ảnh lên...", "info");
+            const url = await uploadImage(file, user.id);
+            editor.chain().focus().setImage({ src: url }).run();
+            useDocumentStore.getState().showToast("Đã tải ảnh lên!", "success");
+          } catch (e) {
+            useDocumentStore.getState().showToast("Lỗi tải ảnh lên cloud. Đang dùng ảnh offline.", "error");
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result === "string") {
+                editor.chain().focus().setImage({ src: reader.result }).run();
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+        } else {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (typeof reader.result === "string") {
+              editor.chain().focus().setImage({ src: reader.result }).run();
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+    } else {
+      const url = window.prompt("Nhập URL hình ảnh:", "");
+      if (url) editor.chain().focus().setImage({ src: url }).run();
+    }
   }, [editor]);
 
   const insertTable = useCallback(() => {
@@ -140,6 +182,26 @@ export default function Toolbar({ editor, onToggleFindReplace }: ToolbarProps) {
           <option key={s} value={s}>{s}</option>
         ))}
       </select>
+      
+      {/* ── Line height ── */}
+      <select
+        className="toolbar-select"
+        style={{ width: 85 }}
+        title="Giãn dòng"
+        defaultValue="1.8"
+        onChange={(e) => {
+          editor.chain().focus().setLineHeight(e.target.value).run();
+        }}
+      >
+        <option value="1.0">Dòng 1.0</option>
+        <option value="1.15">Dòng 1.15</option>
+        <option value="1.5">Dòng 1.5</option>
+        <option value="1.8">Dòng 1.8</option>
+        <option value="2.0">Dòng 2.0</option>
+        <option value="2.5">Dòng 2.5</option>
+        <option value="3.0">Dòng 3.0</option>
+      </select>
+      
       <div className="toolbar-divider" />
 
       {/* ── Text formatting ── */}

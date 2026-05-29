@@ -32,10 +32,12 @@ import Toolbar from "./Toolbar";
 import MenuBar from "./MenuBar";
 import StatusBar from "./StatusBar";
 import FindReplace from "./FindReplace";
+import TableControls from "./TableControls";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useDocumentStore } from "@/store/documentStore";
 import { Document } from "@/types/document";
 import { FontSize } from "@/lib/fontSizeExtension";
+import { LineHeight } from "@/lib/lineHeightExtension";
 
 // Lowlight setup
 const lowlight = createLowlight();
@@ -63,6 +65,7 @@ export default function Editor({ document }: EditorProps) {
       FontFamily,
       TextStyle,
       FontSize,
+      LineHeight,
       Color,
       Highlight.configure({ multicolor: true }),
       Table.configure({ resizable: true }),
@@ -138,6 +141,9 @@ export default function Editor({ document }: EditorProps) {
           <EditorContent editor={editor} />
         </div>
       </div>
+
+      {/* Floating controls */}
+      <TableControls editor={editor} />
 
       {/* Find & Replace floating panel */}
       {showFindReplace && (

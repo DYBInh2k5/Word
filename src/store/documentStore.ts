@@ -20,6 +20,9 @@ interface DocumentStore {
   toggleTheme: () => void;
   setZoom: (zoom: number) => void;
   showToast: (msg: string, type?: "success" | "error" | "info") => void;
+  updatePageSettings: (settings: { pageSize?: "a4" | "letter"; pageOrientation?: "portrait" | "landscape"; pageMargin?: "normal" | "narrow" | "wide" }) => void;
+  updateHeaderFooter: (headerText: string, footerText: string) => void;
+  togglePublicStatus: (isPublic: boolean) => void;
 }
 
 export const useDocumentStore = create<DocumentStore>((set, get) => ({
@@ -92,5 +95,29 @@ export const useDocumentStore = create<DocumentStore>((set, get) => ({
   showToast: (msg, type = "success") => {
     set({ toast: { msg, type } });
     setTimeout(() => set({ toast: null }), 3000);
+  },
+
+  updatePageSettings: (settings) => {
+    const { currentDoc } = get();
+    if (!currentDoc) return;
+    const updated = { ...currentDoc, ...settings };
+    storageSave(updated);
+    set({ currentDoc: updated, documents: getDocuments() });
+  },
+
+  updateHeaderFooter: (headerText, footerText) => {
+    const { currentDoc } = get();
+    if (!currentDoc) return;
+    const updated = { ...currentDoc, headerText, footerText };
+    storageSave(updated);
+    set({ currentDoc: updated, documents: getDocuments() });
+  },
+
+  togglePublicStatus: (isPublic) => {
+    const { currentDoc } = get();
+    if (!currentDoc) return;
+    const updated = { ...currentDoc, isPublic };
+    storageSave(updated);
+    set({ currentDoc: updated, documents: getDocuments() });
   },
 }));

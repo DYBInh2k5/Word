@@ -45,6 +45,12 @@ export function createDocument(title?: string): Document {
     updatedAt: new Date().toISOString(),
     wordCount: 0,
     charCount: 0,
+    pageSize: "a4",
+    pageOrientation: "portrait",
+    pageMargin: "normal",
+    headerText: "",
+    footerText: "",
+    isPublic: false,
   };
 }
 
